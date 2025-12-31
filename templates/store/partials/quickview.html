@@ -1,0 +1,221 @@
+<!-- Quick View Modal Content -->
+<div class="bg-white rounded-lg max-w-4xl mx-auto">
+    <div class="grid md:grid-cols-2 gap-8">
+        <!-- Product Images -->
+        <div class="relative">
+            <div class="aspect-square overflow-hidden rounded-lg bg-gray-100">
+{% if product.image %}
+                    <img src="{{ product.image.url }}" 
+                         alt="{{ product.name }}" 
+                         class="w-full h-full object-cover" id="main-image"
+                         onerror="this.onerror=null; this.parentElement.innerHTML='<div class=&quot;w-full h-full flex items-center justify-center bg-gray-100&quot;><i class=&quot;fas fa-image text-gray-400 text-6xl&quot;></i></div>';">
+                {% else %}
+                    <div class="w-full h-full flex items-center justify-center bg-gray-100">
+                        <i class="fas fa-image text-gray-400 text-6xl"></i>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Product Badges -->
+            <div class="absolute top-3 left-3 space-y-2">
+                {% if not product.available %}
+                    <div class="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                        Out of Stock
+                    </div>
+                {% elif product.stock < 5 %}
+                    <div class="bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                        Only {{ product.stock }} left!
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Product Details -->
+        <div class="p-6">
+            <!-- Category -->
+            <div class="text-sm text-indigo-600 font-medium mb-2 uppercase tracking-wide">
+                {{ product.category.name }}
+            </div>
+            
+            <!-- Product Name -->
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                {{ product.name }}
+            </h2>
+            
+            <!-- Rating -->
+            <div class="flex items-center mb-4">
+                <div class="flex text-yellow-400">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star-half-alt"></i>
+                </div>
+                <span class="text-sm text-gray-500 ml-2">(127 reviews)</span>
+            </div>
+            
+            <!-- Price -->
+            <div class="flex items-center gap-3 mb-6">
+                <span class="text-3xl font-bold text-gray-900">${{ product.price }}</span>
+                <span class="text-lg text-gray-500 line-through">$59.99</span>
+                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm font-semibold">-20%</span>
+            </div>
+            
+            <!-- Description -->
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Description</h3>
+                <p class="text-gray-600">{{ product.description|truncatewords:30 }}</p>
+            </div>
+            
+            <!-- Stock Status -->
+            <div class="mb-6">
+                {% if product.available %}
+                    {% if product.stock > 0 %}
+                        <div class="flex items-center text-green-600">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            <span>{{ product.stock }} items in stock</span>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="flex items-center text-red-600">
+                        <i class="fas fa-times-circle mr-2"></i>
+                        <span>Out of stock</span>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Add to Cart Form -->
+            <div class="space-y-4">
+                {% if product.available and product.stock > 0 %}
+                    <form action="{% url 'store:add_to_cart' product.slug %}" method="post" class="flex gap-3">
+                        {% csrf_token %}
+                        <div class="flex items-center border rounded-lg">
+                            <button type="button" class="px-3 py-2 text-gray-600 hover:bg-gray-100" onclick="this.parentNode.querySelector('input').stepDown()">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" 
+                                   class="w-16 text-center border-0 focus:ring-0">
+                            <button type="button" class="px-3 py-2 text-gray-600 hover:bg-gray-100" onclick="this.parentNode.querySelector('input').stepUp()">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <button type="submit" class="flex-1 bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 transition-colors">
+                            <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
+                        </button>
+                    </form>
+                {% else %}
+                    <button class="w-full bg-gray-400 text-white py-3 px-6 rounded-lg font-semibold cursor-not-allowed" disabled>
+                        <i class="fas fa-times mr-2"></i> Out of Stock
+                    </button>
+                {% endif %}
+                
+                <!-- Action Buttons -->
+                <div class="flex gap-3">
+                    <button onclick="toggleWishlist({{ product.id }})" id="quickview-wishlist-btn-{{ product.id }}"
+                            class="flex-1 border border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+                        <i class="far fa-heart mr-2"></i> 
+                        <span id="quickview-wishlist-text-{{ product.id }}">Add to Wishlist</span>
+                    </button>
+                    <button onclick="shareProduct('{{ product.slug }}')" 
+                            class="flex-1 border border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-share-alt mr-2"></i> Share
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick View JavaScript -->
+<script>
+// Close modal function
+function closeQuickview() {
+    // This function should be called from parent window
+    if (typeof parent.closeQuickviewModal === 'function') {
+        parent.closeQuickviewModal();
+    }
+}
+
+// Check wishlist status when modal loads
+document.addEventListener('DOMContentLoaded', function() {
+    const productId = {{ product.id }};
+    checkQuickviewWishlistStatus(productId);
+});
+
+function checkQuickviewWishlistStatus(productId) {
+    fetch(`/wishlist/add/${productId}/`, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.in_wishlist) {
+            const btn = document.getElementById(`quickview-wishlist-btn-${productId}`);
+            const text = document.getElementById(`quickview-wishlist-text-${productId}`);
+            const icon = btn.querySelector('i');
+            
+            icon.classList.remove('far');
+            icon.classList.add('fas');
+            btn.classList.remove('text-gray-700');
+            btn.classList.add('text-red-600', 'border-red-600');
+            text.textContent = 'In Wishlist';
+        }
+    })
+    .catch(error => {
+        // Ignore errors for wishlist status check
+    });
+}
+
+function shareProduct(productSlug) {
+    // Use parent window functions if available
+    if (typeof parent.shareProduct === 'function') {
+        parent.shareProduct(productSlug);
+    } else {
+        // Fallback implementation
+        const shareUrl = window.location.origin + '/product/' + productSlug + '/';
+        
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                alert('Product link copied to clipboard!');
+            }).catch(err => {
+                console.error('Clipboard error:', err);
+                prompt('Copy this product link:', shareUrl);
+            });
+        } else {
+            // Fallback for older browsers
+            prompt('Copy this product link:', shareUrl);
+        }
+    }
+}
+
+function toggleWishlist(productId) {
+    // Use parent window functions if available
+    if (typeof parent.toggleWishlist === 'function') {
+        parent.toggleWishlist(productId);
+    } else {
+        // Fallback implementation
+        console.log('Parent wishlist function not available');
+    }
+}
+
+function checkQuickviewWishlistStatus(productId) {
+    // Use parent window functions if available
+    if (typeof parent.checkWishlistStatus === 'function') {
+        parent.checkWishlistStatus(productId);
+    } else {
+        console.log('Parent wishlist status function not available');
+    }
+}
+
+function showNotification(message, type = 'success') {
+    // Use parent window functions if available
+    if (typeof parent.showNotification === 'function') {
+        parent.showNotification(message, type);
+    } else {
+        // Fallback: show alert
+        alert(message);
+    }
+}
+</script>

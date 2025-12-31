@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% load store_tags %}
+
+{% block title %}Checkout - ShopHub{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Checkout Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Checkout</h1>
+        <p class="text-gray-600">Complete your order details</p>
+    </div>
+
+    <!-- Checkout Form -->
+    <form action="{% url 'store:checkout' %}" method="post" id="checkout-form" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {% csrf_token %}
+        
+        <!-- Billing Information -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Customer Information -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Customer Information</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">
+                            First Name <span class="text-red-600">*</span>
+                        </label>
+                        <input type="text" id="first_name" name="first_name" required
+                               value="{{ initial_data.first_name }}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">
+                            Last Name <span class="text-red-600">*</span>
+                        </label>
+                        <input type="text" id="last_name" name="last_name" required
+                               value="{{ initial_data.last_name }}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+                        Email Address <span class="text-red-600">*</span>
+                    </label>
+                    <input type="email" id="email" name="email" required
+                           value="{{ initial_data.email }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+            </div>
+
+            <!-- Shipping Information -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Shipping Address</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="address" class="block text-sm font-medium text-gray-700 mb-1">
+                            Street Address <span class="text-red-600">*</span>
+                        </label>
+                        <input type="text" id="address" name="address" required
+                               placeholder="123 Main St, Apt 4B"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="city" class="block text-sm font-medium text-gray-700 mb-1">
+                                City <span class="text-red-600">*</span>
+                            </label>
+                            <input type="text" id="city" name="city" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label for="postal_code" class="block text-sm font-medium text-gray-700 mb-1">
+                                Postal Code <span class="text-red-600">*</span>
+                            </label>
+                            <input type="text" id="postal_code" name="postal_code" required
+                                   placeholder="12345"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Items Summary -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Order Items</h2>
+                <div class="space-y-3">
+                    {% for item in cart_items %}
+                        <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                            <div class="flex items-center space-x-3">
+                                {% if item.product.image %}
+                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" 
+                                         class="w-12 h-12 object-cover rounded">
+                                {% else %}
+                                    <div class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center">
+                                        <i class="fas fa-image text-gray-400 text-sm"></i>
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <p class="font-medium text-gray-900">{{ item.product.name }}</p>
+                                    <p class="text-sm text-gray-500">Qty: {{ item.quantity }} × ${{ item.price }}</p>
+                                </div>
+                            </div>
+                            <div class="font-semibold text-gray-900">
+                                ${{ item.price|mul:item.quantity }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 sticky top-24">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Order Summary</h2>
+                </div>
+                
+                <div class="p-6 space-y-4">
+                    <!-- Subtotal -->
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Subtotal</span>
+                        <span class="font-semibold text-gray-900">${{ total_price }}</span>
+                    </div>
+                    
+                    <!-- Shipping -->
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Shipping</span>
+                        <span class="font-semibold text-gray-900">
+                            {% if shipping_cost == 0 %}
+                                <span class="text-green-600">FREE</span>
+                            {% else %}
+                                ${{ shipping_cost }}
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    <!-- Tax -->
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Tax</span>
+                        <span class="text-gray-500">Calculated at checkout</span>
+                    </div>
+                    
+                    <!-- Divider -->
+                    <div class="border-t border-gray-200 pt-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-lg font-semibold text-gray-900">Total</span>
+                            <span class="text-2xl font-bold text-indigo-600">${{ final_total }}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Place Order Button -->
+                    <button type="submit" 
+                            class="w-full bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 transition-colors">
+                        <i class="fas fa-lock mr-2"></i>
+                        Place Order
+                    </button>
+                    
+                    <!-- Security Notice -->
+                    <div class="flex items-center justify-center space-x-2 text-sm text-gray-600">
+                        <i class="fas fa-shield-alt text-green-600"></i>
+                        <span>Your information is secure</span>
+                    </div>
+                    
+                    <!-- Cancel Link -->
+                    <div class="text-center">
+                        <a href="{% url 'store:cart' %}" class="text-sm text-gray-600 hover:text-indigo-600 transition-colors">
+                            <i class="fas fa-arrow-left mr-1"></i>
+                            Back to Cart
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Form submission -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('#checkout-form');
+    
+    form.addEventListener('submit', function(e) {
+        // Add loading state to button
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+        
+        // Form will submit normally
+    });
+});
+</script>
+{% endblock %}

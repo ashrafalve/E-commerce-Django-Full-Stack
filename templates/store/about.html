@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}About Us - ShopHub{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <!-- Hero Section -->
+    <div class="text-center mb-16">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            About ShopHub
+        </h1>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Your trusted online shopping destination for quality products and exceptional service.
+        </p>
+    </div>
+
+    <!-- Story Section -->
+    <div class="grid md:grid-cols-2 gap-12 mb-16">
+        <div>
+            <h2 class="text-3xl font-bold text-gray-900 mb-6">Our Story</h2>
+            <div class="prose prose-lg text-gray-600">
+                <p class="mb-4">
+                    Founded in 2020, ShopHub started with a simple mission: to make online shopping 
+                    easier, more enjoyable, and more trustworthy for everyone. What began as a small 
+                    startup has grown into a comprehensive e-commerce platform serving thousands of 
+                    satisfied customers worldwide.
+                </p>
+                <p class="mb-4">
+                    We believe in the power of technology to transform shopping experiences, 
+                    bringing the best products right to your doorstep with just a few clicks. 
+                    Our commitment to quality, authenticity, and customer satisfaction remains 
+                    unwavering.
+                </p>
+                <p>
+                    Today, ShopHub continues to innovate and expand our offerings, always keeping 
+                    our customers' needs at the heart of everything we do.
+                </p>
+            </div>
+        </div>
+        <div class="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg p-8 flex items-center justify-center">
+            <i class="fas fa-store text-6xl text-indigo-600"></i>
+        </div>
+    </div>
+
+    <!-- Values Section -->
+    <div class="mb-16">
+        <h2 class="text-3xl font-bold text-gray-900 text-center mb-12">Our Values</h2>
+        <div class="grid md:grid-cols-4 gap-8">
+            <div class="text-center">
+                <div class="bg-indigo-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-shield-alt text-2xl text-indigo-600"></i>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-2">Trust & Security</h3>
+                <p class="text-gray-600">Your safety and trust are our top priorities</p>
+            </div>
+            <div class="text-center">
+                <div class="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-leaf text-2xl text-green-600"></i>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-2">Quality First</h3>
+                <p class="text-gray-600">Only the best products make it to our shelves</p>
+            </div>
+            <div class="text-center">
+                <div class="bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-users text-2xl text-purple-600"></i>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-2">Customer Focus</h3>
+                <p class="text-gray-600">Your satisfaction drives everything we do</p>
+            </div>
+            <div class="text-center">
+                <div class="bg-orange-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-bolt text-2xl text-orange-600"></i>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-2">Innovation</h3>
+                <p class="text-gray-600">Constantly improving your shopping experience</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="bg-gray-50 rounded-lg p-8 mb-16">
+        <div class="grid md:grid-cols-4 gap-8 text-center">
+            <div>
+                <div class="text-3xl font-bold text-indigo-600 mb-2">50K+</div>
+                <div class="text-gray-600">Happy Customers</div>
+            </div>
+            <div>
+                <div class="text-3xl font-bold text-indigo-600 mb-2">10K+</div>
+                <div class="text-gray-600">Products Available</div>
+            </div>
+            <div>
+                <div class="text-3xl font-bold text-indigo-600 mb-2">4.8★</div>
+                <div class="text-gray-600">Average Rating</div>
+            </div>
+            <div>
+                <div class="text-3xl font-bold text-indigo-600 mb-2">24/7</div>
+                <div class="text-gray-600">Customer Support</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="text-center bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg p-12 text-white">
+        <h2 class="text-3xl font-bold mb-4">Join the ShopHub Family</h2>
+        <p class="text-xl mb-8">Experience the difference with quality products and exceptional service</p>
+        <a href="{% url 'store:signup' %}" class="inline-flex items-center px-8 py-3 bg-white text-indigo-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+            Get Started Today
+            <i class="fas fa-arrow-right ml-2"></i>
+        </a>
+    </div>
+</div>
+{% endblock %}

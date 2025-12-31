@@ -1,0 +1,366 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - ShopHub{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav class="mb-8">
+    <ol class="flex items-center space-x-2 text-sm text-gray-600">
+        <li><a href="{% url 'store:home' %}" class="hover:text-indigo-600 transition-colors">Home</a></li>
+        <li class="flex items-center">
+            <i class="fas fa-chevron-right mx-2 text-gray-400"></i>
+            <a href="{% url 'store:category_products' product.category.slug %}" class="hover:text-indigo-600 transition-colors">
+                {{ product.category.name }}
+            </a>
+        </li>
+        <li class="flex items-center">
+            <i class="fas fa-chevron-right mx-2 text-gray-400"></i>
+            <span class="text-gray-900 font-medium">{{ product.name }}</span>
+        </li>
+    </ol>
+</nav>
+
+<!-- Product Detail Container -->
+<div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
+        <!-- Product Image Section -->
+        <div class="space-y-4">
+            <!-- Main Image -->
+            <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" 
+                         alt="{{ product.name }}" 
+                         class="w-full h-full object-cover">
+                {% else %}
+                    <div class="w-full h-full flex items-center justify-center bg-gray-200">
+                        <i class="fas fa-image text-gray-400 text-6xl"></i>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Image Thumbnails (placeholder for future gallery) -->
+            <div class="grid grid-cols-4 gap-2">
+                <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer ring-2 ring-indigo-600">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <div class="w-full h-full flex items-center justify-center bg-gray-200">
+                            <i class="fas fa-image text-gray-400 text-2xl"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-indigo-600">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <div class="w-full h-full flex items-center justify-center bg-gray-200">
+                            <i class="fas fa-image text-gray-400 text-2xl"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-indigo-600">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <div class="w-full h-full flex items-center justify-center bg-gray-200">
+                            <i class="fas fa-image text-gray-400 text-2xl"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-indigo-600">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <div class="w-full h-full flex items-center justify-center bg-gray-200">
+                            <i class="fas fa-image text-gray-400 text-2xl"></i>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Product Details Section -->
+        <div class="space-y-6">
+            <!-- Product Header -->
+            <div>
+                <div class="text-sm text-indigo-600 font-medium mb-2">
+                    {{ product.category.name }}
+                </div>
+                <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+                    {{ product.name }}
+                </h1>
+                
+                <!-- Stock Status -->
+                <div class="flex items-center space-x-4 mb-4">
+                    {% if product.available %}
+                        {% if product.stock > 0 %}
+                            <div class="flex items-center text-green-600">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                <span class="font-medium">In Stock</span>
+                                <span class="text-gray-500 ml-2">({{ product.stock }} available)</span>
+                            </div>
+                        {% else %}
+                            <div class="flex items-center text-orange-600">
+                                <i class="fas fa-clock mr-2"></i>
+                                <span class="font-medium">Made to Order</span>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="flex items-center text-red-600">
+                            <i class="fas fa-times-circle mr-2"></i>
+                            <span class="font-medium">Out of Stock</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Price Section -->
+            <div class="bg-gray-50 rounded-lg p-6">
+                <div class="flex items-baseline space-x-2">
+                    <span class="text-4xl font-bold text-indigo-600">${{ product.price }}</span>
+                    <span class="text-gray-500">USD</span>
+                </div>
+                <div class="mt-2 text-sm text-gray-600">
+                    Free shipping on orders over $50
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">Description</h3>
+                <div class="text-gray-600 leading-relaxed">
+                    {{ product.description|linebreaks }}
+                </div>
+            </div>
+
+            <!-- Add to Cart Section -->
+            <div>
+                {% if product.available and product.stock > 0 %}
+                    <form action="{% url 'store:add_to_cart' product.slug %}" method="post" class="space-y-4">
+                        {% csrf_token %}
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center border rounded-lg">
+                                <button type="button" class="px-3 py-2 text-gray-600 hover:bg-gray-100" onclick="this.parentNode.querySelector('input').stepDown()">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" 
+                                       class="w-16 text-center border-0 focus:ring-0">
+                                <button type="button" class="px-3 py-2 text-gray-600 hover:bg-gray-100" onclick="this.parentNode.querySelector('input').stepUp()">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            <button type="submit" class="bg-indigo-600 text-white py-3 px-8 rounded-lg font-semibold hover:bg-indigo-700 transition-colors">
+                                <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
+                            </button>
+                        </div>
+                    </form>
+                {% else %}
+                    <button class="w-full bg-gray-400 text-white py-3 px-6 rounded-lg font-semibold cursor-not-allowed" disabled>
+                        <i class="fas fa-times mr-2"></i>
+                        {% if product.available %}
+                            Made to Order
+                        {% else %}
+                            Out of Stock
+                        {% endif %}
+                    </button>
+                {% endif %}
+                
+                <div class="flex space-x-4">
+                    <button onclick="toggleWishlist({{ product.id }})" id="wishlist-btn-{{ product.id }}" 
+                            class="flex-1 border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors">
+                        <i class="far fa-heart mr-2"></i>
+                        <span id="wishlist-text-{{ product.id }}">Add to Wishlist</span>
+                    </button>
+                    <button onclick="shareProduct('{{ product.slug }}')" 
+                            class="flex-1 border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-share-alt mr-2"></i>
+                        Share
+                    </button>
+                </div>
+            </div>
+
+            <!-- Trust Badges -->
+            <div class="border-t border-gray-200 pt-6">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                    <div class="flex flex-col items-center">
+                        <i class="fas fa-shipping-fast text-indigo-600 text-2xl mb-2"></i>
+                        <span class="text-sm text-gray-600">Free Shipping</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <i class="fas fa-shield-alt text-indigo-600 text-2xl mb-2"></i>
+                        <span class="text-sm text-gray-600">Secure Payment</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <i class="fas fa-undo text-indigo-600 text-2xl mb-2"></i>
+                        <span class="text-sm text-gray-600">30-Day Returns</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Product Actions -->
+<script>
+// Check if product is in wishlist on page load
+document.addEventListener('DOMContentLoaded', function() {
+    checkWishlistStatus({{ product.id }});
+});
+
+function toggleWishlist(productId) {
+    const btn = document.getElementById(`wishlist-btn-${productId}`);
+    const text = document.getElementById(`wishlist-text-${productId}`);
+    const icon = btn.querySelector('i');
+    
+    // Show loading state
+    btn.disabled = true;
+    text.textContent = 'Loading...';
+    
+    fetch(`/wishlist/add/${productId}/`, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (data.action === 'added') {
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+                btn.classList.remove('text-gray-700');
+                btn.classList.add('text-red-600', 'border-red-600');
+                text.textContent = 'In Wishlist';
+            } else {
+                icon.classList.remove('fas');
+                icon.classList.add('far');
+                btn.classList.remove('text-red-600', 'border-red-600');
+                btn.classList.add('text-gray-700');
+                text.textContent = 'Add to Wishlist';
+            }
+            showNotification(data.message);
+        } else {
+            showNotification(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('Error updating wishlist', 'error');
+    })
+    .finally(() => {
+        btn.disabled = false;
+    });
+}
+
+function checkWishlistStatus(productId) {
+    fetch(`/wishlist/add/${productId}/`, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.in_wishlist) {
+            const btn = document.getElementById(`wishlist-btn-${productId}`);
+            const text = document.getElementById(`wishlist-text-${productId}`);
+            const icon = btn.querySelector('i');
+            
+            icon.classList.remove('far');
+            icon.classList.add('fas');
+            btn.classList.remove('text-gray-700');
+            btn.classList.add('text-red-600', 'border-red-600');
+            text.textContent = 'In Wishlist';
+        }
+    })
+    .catch(error => {
+        // Ignore errors for wishlist status check
+    });
+}
+
+function shareProduct(productSlug) {
+    const shareUrl = window.location.origin + '/product/' + productSlug + '/';
+    
+    // Copy to clipboard with better error handling
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            showNotification('Product link copied to clipboard!');
+        }).catch(err => {
+            console.error('Clipboard error:', err);
+            shareFallback(shareUrl);
+        });
+    } else {
+        // Fallback for older browsers
+        shareFallback(shareUrl);
+    }
+}
+
+function shareFallback(url) {
+    // Create temporary input element
+    const tempInput = document.createElement('input');
+    tempInput.value = url;
+    tempInput.style.position = 'absolute';
+    tempInput.style.left = '-9999px';
+    document.body.appendChild(tempInput);
+    
+    // Select and copy
+    tempInput.select();
+    tempInput.setSelectionRange(0, 99999); // For mobile devices
+    
+    try {
+        document.execCommand('copy');
+        showNotification('Product link copied to clipboard!');
+    } catch (err) {
+        console.error('Copy error:', err);
+        // Final fallback: show URL in prompt
+        prompt('Copy this product link:', url);
+    }
+    
+    // Remove temporary input
+    document.body.removeChild(tempInput);
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function showNotification(message, type = 'success') {
+    // Create notification element
+    const notification = document.createElement('div');
+    const bgColor = type === 'success' ? 'bg-green-600' : 'bg-red-600';
+    notification.className = `fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300`;
+    notification.innerHTML = `
+        <div class="flex items-center">
+            <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle mr-2"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+    
+    setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+</script>
+
+{% endblock %}

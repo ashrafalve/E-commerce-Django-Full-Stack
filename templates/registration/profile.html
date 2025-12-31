@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - ShopHub{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Profile Header -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-8">
+        <div class="flex items-center space-x-4">
+            <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-user text-indigo-600 text-3xl"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">{{ user.get_full_name|default:user.username }}</h1>
+                <p class="text-gray-600">{{ user.email }}</p>
+                <p class="text-sm text-gray-500">Member since {{ user.date_joined|date:"F Y" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Account Information -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-6">Account Information</h2>
+                
+                <div class="space-y-6">
+                    <!-- Username -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                        <div class="flex items-center">
+                            <span class="text-gray-900">{{ user.username }}</span>
+                            <button class="ml-3 text-sm text-indigo-600 hover:text-indigo-700">Edit</button>
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                        <div class="flex items-center">
+                            <span class="text-gray-900">{{ user.email }}</span>
+                            <button class="ml-3 text-sm text-indigo-600 hover:text-indigo-700">Edit</button>
+                        </div>
+                    </div>
+
+                    <!-- Name -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <div class="flex items-center">
+                            <span class="text-gray-900">
+                                {{ user.get_full_name|default:"Not set" }}
+                            </span>
+                            <button class="ml-3 text-sm text-indigo-600 hover:text-indigo-700">Edit</button>
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <button class="text-sm text-indigo-600 hover:text-indigo-700">Change Password</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Orders -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-lg font-semibold text-gray-900">Recent Orders</h2>
+                    <a href="{% url 'store:order_history' %}" class="text-sm text-indigo-600 hover:text-indigo-700">
+                        View All
+                    </a>
+                </div>
+                
+                {% include 'store/partials/recent_orders.html' %}
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-6">Quick Actions</h2>
+                
+                <div class="space-y-4">
+                    <a href="{% url 'store:order_history' %}" 
+                       class="flex items-center p-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i class="fas fa-list-alt text-indigo-600 mr-3"></i>
+                        <div>
+                            <div class="font-medium">Order History</div>
+                            <div class="text-sm text-gray-500">View past orders</div>
+                        </div>
+                    </a>
+                    
+                    <a href="#" class="flex items-center p-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i class="fas fa-heart text-indigo-600 mr-3"></i>
+                        <div>
+                            <div class="font-medium">Wishlist</div>
+                            <div class="text-sm text-gray-500">Saved items</div>
+                        </div>
+                    </a>
+                    
+                    <a href="#" class="flex items-center p-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i class="fas fa-map-marker-alt text-indigo-600 mr-3"></i>
+                        <div>
+                            <div class="font-medium">Addresses</div>
+                            <div class="text-sm text-gray-500">Shipping addresses</div>
+                        </div>
+                    </a>
+                    
+                    <a href="#" class="flex items-center p-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i class="fas fa-credit-card text-indigo-600 mr-3"></i>
+                        <div>
+                            <div class="font-medium">Payment Methods</div>
+                            <div class="text-sm text-gray-500">Saved cards</div>
+                        </div>
+                    </a>
+                    
+                    <a href="#" class="flex items-center p-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i class="fas fa-cog text-indigo-600 mr-3"></i>
+                        <div>
+                            <div class="font-medium">Settings</div>
+                            <div class="text-sm text-gray-500">Preferences</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Account Management</h2>
+                
+                <div class="space-y-3">
+                    <form action="{% url 'store:logout' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" 
+                                class="w-full flex items-center justify-center p-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                            <i class="fas fa-sign-out-alt text-red-600 mr-3"></i>
+                            <span>Sign Out</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

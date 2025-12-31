@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block title %}Shopping Cart - ShopHub{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Cart Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
+        <p class="text-gray-600">
+            {% if cart_items %}
+                {{ cart_count }} item{{ cart_count|pluralize }} in your cart
+            {% else %}
+                Your cart is empty
+            {% endif %}
+        </p>
+    </div>
+
+    {% if cart_items %}
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Cart Items -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <!-- Cart Items Header -->
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-lg font-semibold text-gray-900">Cart Items</h2>
+                            <a href="{% url 'store:clear_cart' %}" 
+                               class="text-sm text-red-600 hover:text-red-700 transition-colors"
+                               onclick="return confirm('Are you sure you want to clear your entire cart?')">
+                                <i class="fas fa-trash-alt mr-1"></i> Clear Cart
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Cart Items List -->
+                    <div class="divide-y divide-gray-200">
+                        {% for item in cart_items %}
+                            <div class="p-6">
+                                <form action="{% url 'store:update_cart' item.id %}" method="post" class="space-y-4">
+                                    {% csrf_token %}
+                                    <div class="flex flex-col sm:flex-row gap-4">
+                                        <!-- Product Image -->
+                                        <div class="flex-shrink-0">
+                                            {% if item.image %}
+                                                <img src="{{ item.image }}" alt="{{ item.name }}" 
+                                                     class="w-20 h-20 object-cover rounded-lg">
+                                            {% else %}
+                                                <div class="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center">
+                                                    <i class="fas fa-image text-gray-400"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+
+                                        <!-- Product Info -->
+                                        <div class="flex-1">
+                                            <div class="flex justify-between items-start">
+                                                <div>
+                                                    <h3 class="text-lg font-semibold text-gray-900">
+                                                        <a href="{% url 'store:product_detail' item.slug %}" 
+                                                           class="hover:text-indigo-600 transition-colors">
+                                                            {{ item.name }}
+                                                        </a>
+                                                    </h3>
+                                                    <p class="text-sm text-gray-500 mt-1">
+                                                        ${{ item.price }} each
+                                                    </p>
+                                                    {% if not item.available %}
+                                                        <p class="text-sm text-red-600 mt-1">
+                                                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                                                            Product no longer available
+                                                        </p>
+                                                    {% elif item.stock < item.quantity %}
+                                                        <p class="text-sm text-orange-600 mt-1">
+                                                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                                                            Only {{ item.stock }} available
+                                                        </p>
+                                                    {% endif %}
+                                                </div>
+                                                
+                                                <!-- Remove Button -->
+                                                <a href="{% url 'store:remove_from_cart' item.id %}" 
+                                                   class="text-red-600 hover:text-red-700 transition-colors"
+                                                   onclick="return confirm('Remove {{ item.name }} from cart?')">
+                                                    <i class="fas fa-times"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        <!-- Quantity and Price -->
+                                        <div class="flex items-center justify-between sm:justify-end gap-4">
+                                            <!-- Quantity Selector -->
+                                            <div class="flex items-center border border-gray-300 rounded-lg">
+                                                <button type="button" 
+                                                        onclick="decreaseQuantity(this)"
+                                                        class="px-3 py-2 text-gray-600 hover:text-gray-900 focus:outline-none">
+                                                    <i class="fas fa-minus"></i>
+                                                </button>
+                                                <input type="number" 
+                                                       name="quantity" 
+                                                       value="{{ item.quantity }}" 
+                                                       min="1" 
+                                                       max="{{ item.stock|default:99 }}"
+                                                       class="w-16 text-center border-0 focus:ring-0 focus:outline-none">
+                                                <button type="button" 
+                                                        onclick="increaseQuantity(this)"
+                                                        class="px-3 py-2 text-gray-600 hover:text-gray-900 focus:outline-none">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+                                            </div>
+
+                                            <!-- Item Total -->
+                                            <div class="text-right">
+                                                <div class="text-lg font-semibold text-gray-900">
+                                                    ${{ item.item_total }}
+                                                </div>
+                                                <button type="submit" 
+                                                        class="text-sm text-indigo-600 hover:text-indigo-700 transition-colors">
+                                                    Update
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Continue Shopping -->
+                <div class="mt-6 text-center">
+                    <a href="{% url 'store:home' %}" 
+                       class="inline-flex items-center text-indigo-600 hover:text-indigo-700 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Continue Shopping
+                    </a>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 sticky top-24">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Order Summary</h2>
+                    </div>
+                    
+                    <div class="p-6 space-y-4">
+                        <!-- Subtotal -->
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Subtotal</span>
+                            <span class="text-lg font-semibold text-gray-900">${{ total_price }}</span>
+                        </div>
+                        
+                        <!-- Shipping -->
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Shipping</span>
+                            <span class="text-green-600">
+                                {% if total_price >= 50 %}
+                                    FREE
+                                {% else %}
+                                    $5.99
+                                {% endif %}
+                            </span>
+                        </div>
+                        
+                        <!-- Tax (placeholder) -->
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Tax</span>
+                            <span class="text-gray-900">Calculated at checkout</span>
+                        </div>
+                        
+                        <!-- Divider -->
+                        <div class="border-t border-gray-200 pt-4">
+                            <div class="flex justify-between items-center">
+                                <span class="text-lg font-semibold text-gray-900">Total</span>
+                                <span class="text-2xl font-bold text-indigo-600">
+                                    {% if total_price >= 50 %}
+                                        ${{ total_price }}
+                                    {% else %}
+                                        ${{ total_price|add:"5.99" }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Checkout Button -->
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'store:checkout' %}" 
+                               class="block w-full bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 transition-colors text-center">
+                                <i class="fas fa-lock mr-2"></i>
+                                Proceed to Checkout
+                            </a>
+                        {% else %}
+                            <a href="{% url 'store:login' %}?next={% url 'store:checkout' %}" 
+                               class="block w-full bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 transition-colors text-center">
+                                <i class="fas fa-sign-in-alt mr-2"></i>
+                                Login to Checkout
+                            </a>
+                        {% endif %}
+                        
+                        <!-- Shipping Notice -->
+                        {% if total_price < 50 %}
+                            <div class="text-center text-sm text-gray-600">
+                                <i class="fas fa-truck mr-1"></i>
+                                Add ${{ shipping_needed }} more for FREE shipping!
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Security Badge -->
+                        <div class="flex items-center justify-center space-x-2 text-sm text-gray-600">
+                            <i class="fas fa-shield-alt text-green-600"></i>
+                            <span>Secure Checkout</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <!-- Empty Cart -->
+        <div class="text-center py-16">
+            <div class="bg-gray-100 rounded-lg p-8 max-w-md mx-auto">
+                <i class="fas fa-shopping-cart text-gray-400 text-6xl mb-4"></i>
+                <h2 class="text-2xl font-semibold text-gray-900 mb-4">Your cart is empty</h2>
+                <p class="text-gray-600 mb-6">
+                    Looks like you haven't added anything to your cart yet.
+                </p>
+                <a href="{% url 'store:home' %}" 
+                   class="inline-flex items-center bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 transition-colors">
+                    <i class="fas fa-shopping-bag mr-2"></i>
+                    Start Shopping
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- JavaScript -->
+<script>
+function increaseQuantity(button) {
+    const input = button.parentElement.querySelector('input[type="number"]');
+    const max = parseInt(input.getAttribute('max'));
+    const current = parseInt(input.value);
+    if (current < max) {
+        input.value = current + 1;
+    }
+}
+
+function decreaseQuantity(button) {
+    const input = button.parentElement.querySelector('input[type="number"]');
+    const current = parseInt(input.value);
+    if (current > 1) {
+        input.value = current - 1;
+    }
+}
+
+// Auto-submit form on quantity change (debounced)
+let timeout;
+document.addEventListener('DOMContentLoaded', function() {
+    const quantityInputs = document.querySelectorAll('input[name="quantity"]');
+    quantityInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                this.form.submit();
+            }, 1000);
+        });
+    });
+});
+</script>
+{% endblock %}

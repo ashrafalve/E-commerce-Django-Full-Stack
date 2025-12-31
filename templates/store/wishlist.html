@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}My Wishlist - ShopHub{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">My Wishlist</h1>
+        <p class="text-gray-600">
+            {% if wishlist_items %}
+                You have {{ wishlist_items.count }} item{{ wishlist_items.count|pluralize }} in your wishlist
+            {% else %}
+                Save your favorite items for later
+            {% endif %}
+        </p>
+    </div>
+
+    {% if wishlist_items %}
+        <!-- Wishlist Items Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-12">
+            {% for wishlist_item in wishlist_items %}
+                <div class="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group">
+                    <!-- Product Image -->
+                    <div class="relative aspect-square overflow-hidden bg-gray-100">
+                        {% if wishlist_item.product.image %}
+                            <img src="{{ wishlist_item.product.image.url }}" 
+                                 alt="{{ wishlist_item.product.name }}" 
+                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                 onerror="this.onerror=null; this.parentElement.innerHTML='<div class=&quot;w-full h-full flex items-center justify-center bg-gray-200&quot;><i class=&quot;fas fa-image text-gray-400 text-3xl&quot;></i></div>';">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center bg-gray-200">
+                                <i class="fas fa-image text-gray-400 text-3xl"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Remove Button -->
+                        <button onclick="removeFromWishlist({{ wishlist_item.product.id }}, '{{ wishlist_item.product.name }}')" 
+                                class="absolute top-3 right-3 bg-white text-red-600 p-2 rounded-full shadow-md hover:bg-red-50 transition-colors">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        
+                        <!-- Stock Badge -->
+                        {% if not wishlist_item.product.available %}
+                            <div class="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
+                                Out of Stock
+                            </div>
+                        {% elif wishlist_item.product.stock < 5 %}
+                            <div class="absolute top-3 left-3 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
+                                Only {{ wishlist_item.product.stock }} left!
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Product Info -->
+                    <div class="p-4">
+                        <!-- Category -->
+                        <div class="text-xs text-indigo-600 font-medium mb-2 uppercase tracking-wide">
+                            {{ wishlist_item.product.category.name }}
+                        </div>
+                        
+                        <!-- Product Name -->
+                        <h3 class="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors">
+                            <a href="{% url 'store:product_detail' wishlist_item.product.slug %}">
+                                {{ wishlist_item.product.name }}
+                            </a>
+                        </h3>
+                        
+                        <!-- Price -->
+                        <div class="text-lg font-bold text-gray-900 mb-3">
+                            ${{ wishlist_item.product.price }}
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="space-y-2">
+                            {% if wishlist_item.product.available and wishlist_item.product.stock > 0 %}
+                                <form action="{% url 'store:add_to_cart' wishlist_item.product.slug %}" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-indigo-700 transition-colors text-sm">
+                                        <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
+                                    </button>
+                                </form>
+                            {% else %}
+                                <button class="w-full bg-gray-400 text-white py-2 px-4 rounded-lg font-medium cursor-not-allowed text-sm" disabled>
+                                    <i class="fas fa-times mr-2"></i> Out of Stock
+                                </button>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Added Date -->
+                        <div class="mt-3 text-xs text-gray-500">
+                            Added {{ wishlist_item.created_at|timesince }} ago
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- Empty Wishlist Message -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+            <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-heart text-3xl text-gray-400"></i>
+            </div>
+            <h2 class="text-2xl font-semibold text-gray-900 mb-3">Your wishlist is empty</h2>
+            <p class="text-gray-600 mb-6 max-w-md mx-auto">
+                Start adding items to your wishlist by clicking the heart icon on any product. 
+                You can save items here to purchase later.
+            </p>
+            <a href="{% url 'store:home' %}" class="inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">
+                <i class="fas fa-shopping-bag mr-2"></i>
+                Start Shopping
+            </a>
+        </div>
+    {% endif %}
+
+    <!-- Features Section -->
+    <div class="mt-16 grid md:grid-cols-3 gap-8">
+        <div class="text-center">
+            <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-heart text-2xl text-indigo-600"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Save Favorites</h3>
+            <p class="text-gray-600">Keep track of products you love in one convenient place</p>
+        </div>
+        <div class="text-center">
+            <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-bell text-2xl text-indigo-600"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Price Alerts</h3>
+            <p class="text-gray-600">Get notified when items in your wishlist go on sale</p>
+        </div>
+        <div class="text-center">
+            <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-sync text-2xl text-indigo-600"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Stock Updates</h3>
+            <p class="text-gray-600">Know when out-of-stock items become available again</p>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Wishlist Management -->
+<script>
+function removeFromWishlist(productId, productName) {
+    if (!confirm(`Remove "${productName}" from your wishlist?`)) {
+        return;
+    }
+    
+    fetch(`/wishlist/remove/${productId}/`, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message, 'success');
+            // Reload page to update wishlist
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showNotification(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('Error removing from wishlist', 'error');
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function showNotification(message, type = 'success') {
+    const notification = document.createElement('div');
+    const bgColor = type === 'success' ? 'bg-green-600' : 'bg-red-600';
+    notification.className = `fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300`;
+    notification.innerHTML = `
+        <div class="flex items-center">
+            <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle mr-2"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+    
+    setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+</script>
+{% endblock %}
